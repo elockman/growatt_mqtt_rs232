@@ -1,6 +1,8 @@
-
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <ModbusMaster.h>
+#include <ArduinoOTA.h>
+
 const char* ssid = "sneakypreen";
 const char* password = "gumboots";
 const char* mqtt_server = "192.168.0.3";
@@ -12,18 +14,6 @@ char msg[50];
 int value = 0;
 
 
-
-
-
-
-
-
-
-
-#include <ModbusMaster.h>
-
-
-#include <ArduinoOTA.h>
 
 #define LED 16
 
