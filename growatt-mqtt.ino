@@ -2,10 +2,22 @@
 #include <PubSubClient.h>
 #include <ModbusMaster.h>
 #include <ArduinoOTA.h>
+#include "secrets.h"
+#define LED 16
 
-const char* ssid = "sneakypreen";
-const char* password = "gumboots";
-const char* mqtt_server = "192.168.0.3";
+const char* wifi_ssid                  = WIFI_SSID;
+const char* wifi_password              = WIFI_PASSWORD;
+const char* wifi_hostname              = WIFI_HOSTNAME;
+const char* ota_password               = OTA_PASSWORD;
+
+const char* mqtt_server                = MQTT_SERVER;
+const int   mqtt_port                  = MQTT_PORT;
+const char* mqtt_username              = MQTT_USERNAME;
+const char* mqtt_password              = MQTT_PASSWORD;
+
+const char* mqtt_topic_base            = MQTT_TOPIC_BASE;
+const char* mqtt_log_topic             = MQTT_LOG_TOPIC;
+const char* mqtt_lwt_topic             = MQTT_LWT_TOPIC;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -13,11 +25,9 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
-
-
-#define LED 16
-
-// instantiate ModbusMaster object
+/******************************************************************
+Instantiate modbus and mqtt libraries
+*******************************************************************/
 ModbusMaster node;
 
 
@@ -32,7 +42,7 @@ void setup(){
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
 
-  WiFi.begin(ssid, password);
+  WiFi.begin(wifi_ssid, wifi_password);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -43,12 +53,28 @@ void setup(){
   
   digitalWrite(LED, HIGH);
 
+  // Port defaults to 8266
+  ArduinoOTA.setPort(8266);
+
+  // Hostname defaults to esp8266-[ChipID]
+  ArduinoOTA.setHostname(wifi_hostname);
+
+  // Set authentication
+  ArduinoOTA.setPassword(ota_password);
+
+  ArduinoOTA.onStart([]() {
+  });
+  ArduinoOTA.onEnd([]() {
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+
+  });
   ArduinoOTA.begin();
   
 }
-
-
-
 
 
 
@@ -74,6 +100,9 @@ void reconnect() {
 }
 
 
+/******************************************************************
+Create float using values from multiple regsiters
+*******************************************************************/
 float glueFloat(unsigned int d1, unsigned int d0){
   unsigned long t;
   t = d1 << 16;
